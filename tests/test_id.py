@@ -175,3 +175,92 @@ def test_id_nil_comparisons():
     assert id1 == id2
     assert not (id1 < id2)
     assert not (id2 < id1)
+
+def test_id_edge_cases():
+    """Test edge cases in ID creation and handling"""
+    # Test ID with zero value
+    zero_id = ID(0)
+    assert str(zero_id) == ""
+    
+    # Test empty string parse
+    with pytest.raises(ErrBadLength):
+        ID.parse("")
+
+def test_digest_comparison():
+    """Test digest comparison operations"""
+    d1 = Digest(bytes([1] * 64))
+    d2 = Digest(bytes([2] * 64))
+    
+    # Test less than comparison
+    assert d1 < d2
+    assert not (d2 < d1)
+    
+    # Test equality
+    d3 = Digest(bytes([1] * 64))
+    assert d1 == d3
+    assert not (d1 < d3)
+
+def test_encoder_large_data():
+    """Test encoder with large data chunks"""
+    encoder = Encoder()
+    
+    # Write large chunk of data
+    large_data = bytes([x % 256 for x in range(1000000)])
+    written = encoder.write(large_data)
+    assert written == len(large_data)
+    
+    # Get ID and verify it's valid
+    id_obj = encoder.id()
+    assert isinstance(id_obj, ID)
+    assert len(str(id_obj)) == 90
+    
+    # Get digest and verify
+    digest = encoder.digest()
+    assert isinstance(digest, Digest)
+    assert len(digest) == 64
+
+def test_id_value_edge_cases():
+    """Test ID creation with edge case values (line 61)"""
+    # Create an ID with value 0, which should result in empty string
+    id_obj = ID(0)
+    assert str(id_obj) == ""
+    
+    # Test with a small positive value to ensure encoding works
+    id_obj = ID(1)
+    assert str(id_obj).startswith('c4')
+    assert len(str(id_obj)) == 90
+
+def test_digest_invalid_bytes():
+    """Test Digest creation with invalid bytes (line 123)"""
+    # Test with empty bytes
+    empty_digest = Digest(b'')
+    assert len(empty_digest) == 64
+    assert all(b == 0 for b in empty_digest)
+    
+    # Test with bytes that are too long (line 123 case)
+    too_long = bytes([1] * 65)
+    invalid_digest = Digest(too_long)
+    assert invalid_digest is None
+
+def test_id_parse_invalid_char():
+    """Test ID.parse with an invalid character in the ID string (line 61)"""
+    test_id = "c4" + "1" * 87 + "0"  # "0" is not in the valid charset
+    with pytest.raises(ErrBadChar) as exc:
+        ID.parse(test_id)
+    assert exc.value.pos == 89  # The invalid char is at position 89
+
+def test_digest_overflow():
+    """Test creating a digest that would overflow (line 123)"""
+    # Create a large bytes object
+    max_bytes = b'\xff' * 64
+    digest = Digest(max_bytes)
+    
+    # Try to create a new ID from this digest
+    id_obj = digest.id()
+    assert isinstance(id_obj, ID)
+    
+    # Now try to create a new digest from this ID
+    # This should hit line 123 as we manipulate the internal value
+    result = id_obj.digest()
+    assert isinstance(result, Digest)
+    assert len(result) == 64
