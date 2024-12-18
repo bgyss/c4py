@@ -1,8 +1,7 @@
 # src/c4/id.py
 import hashlib
-import math
-from typing import Optional, Union, BinaryIO
-from .errors import ErrBadChar, ErrBadLength, ErrNil
+from typing import Optional, BinaryIO
+from .errors import ErrBadChar, ErrBadLength
 
 CHARSET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 BASE = 58
