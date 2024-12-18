@@ -106,3 +106,72 @@ def test_digest_sum():
     
     # Sum with self should return self
     assert d1.sum(d1) == d1
+
+def test_digest_edge_cases():
+    """Test edge cases in Digest handling"""
+    # Test empty digest
+    empty_digest = Digest(b'')
+    assert len(empty_digest) == 64
+    assert all(b == 0 for b in empty_digest)
+    
+    # Test oversized input
+    oversized = bytes([1] * 65)
+    assert Digest(oversized) is None
+
+def test_id_basic_comparisons():
+    """Test edge cases in ID comparison"""
+    id1 = ID.parse("c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1")
+    
+    # Test comparison with None
+    assert id1 is not None
+    assert not (id1 < None)
+    
+    # Test equality with same ID
+    id2 = ID.parse("c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1")
+    assert id1 == id2
+
+def test_nil_id_handling():
+    """Test handling of nil IDs"""
+    from c4py.id import NIL_ID
+    assert NIL_ID is not None
+    # Test nil ID string representation
+    assert len(str(NIL_ID)) == 90
+    assert str(NIL_ID).startswith('c4')
+
+def test_digest_sum_edge_cases():
+    """Test edge cases in digest sum operation"""
+    from c4py.id import Digest
+    # Create two identical digests
+    d1 = Digest(bytes([1] * 64))
+    d2 = Digest(bytes([1] * 64))
+    # Sum should return either digest when they're identical
+    assert d1.sum(d2) == d1
+
+def test_encoder_error_handling():
+    """Test encoder error conditions"""
+    from c4py import Encoder
+    encoder = Encoder()
+    # Test reset after write
+    encoder.write(b'test')
+    encoder.reset()
+    # Verify reset worked by checking ID
+    id1 = encoder.id()
+    encoder.write(b'test')
+    id2 = encoder.id()
+    assert id1 != id2
+
+# Update test_id_comparison_edge_cases
+def test_id_nil_comparisons():
+    """Test edge cases in ID comparison"""
+    from c4py.id import NIL_ID
+    
+    # Compare with None
+    assert not (NIL_ID < None)
+    assert NIL_ID is not None
+    
+    # Compare with same ID
+    id1 = NIL_ID
+    id2 = NIL_ID
+    assert id1 == id2
+    assert not (id1 < id2)
+    assert not (id2 < id1)

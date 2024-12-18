@@ -1,9 +1,52 @@
 # src/c4py/cli.py
 import os
+import datetime
 import sys
 from typing import Optional, List
 import click
 from . import identify, ID
+
+def get_file_metadata(path: str) -> dict:
+    """Get metadata for a file"""
+    stat = os.stat(path)
+    return {
+        'size': stat.st_size,
+        'modified': datetime.datetime.fromtimestamp(stat.st_mtime).isoformat(),
+        'created': datetime.datetime.fromtimestamp(stat.st_ctime).isoformat(),
+        'mode': stat.st_mode
+    }
+
+def format_output(path: str, id_obj: ID, verbose: bool, path_first: bool, metadata: bool = False) -> str:
+    """Format the output according to CLI options"""
+    if not verbose and not metadata:
+        return str(id_obj)
+    
+    parts = []
+    
+    if metadata:
+        meta = get_file_metadata(path)
+        if path_first:
+            parts.extend([
+                path,
+                f"ID: {str(id_obj)}",
+                f"Size: {meta['size']} bytes",
+                f"Modified: {meta['modified']}",
+                f"Created: {meta['created']}"
+            ])
+        else:
+            parts.extend([
+                f"ID: {str(id_obj)}",
+                f"Path: {path}",
+                f"Size: {meta['size']} bytes",
+                f"Modified: {meta['modified']}",
+                f"Created: {meta['created']}"
+            ])
+        return '\n'.join(parts)
+    
+    # Regular verbose output without metadata
+    if path_first:
+        return f"{path}: {str(id_obj)}"
+    return f"{str(id_obj)}: {path}"
 
 def identify_file(path: str) -> Optional[ID]:
     """Identify a single file"""
@@ -39,15 +82,6 @@ def process_directory(path: str, follow_links: bool, depth: int, absolute: bool)
     
     return results
 
-def format_output(path: str, id_obj: ID, verbose: bool, path_first: bool) -> str:
-    """Format the output according to CLI options"""
-    if not verbose:
-        return str(id_obj)
-    
-    if path_first:
-        return f"{path}: {str(id_obj)}"
-    return f"{str(id_obj)}: {path}"
-
 @click.command()
 @click.version_option(version='0.1.0', prog_name='c4py')
 @click.option('--recursive', '-R', is_flag=True, help='Recursively identify all files')
@@ -57,32 +91,42 @@ def format_output(path: str, id_obj: ID, verbose: bool, path_first: bool) -> str
 @click.option('--metadata', '-m', is_flag=True, help='Include metadata')
 @click.option('--verbose', '-V', is_flag=True, help='Include filenames in output')
 @click.option('--path-first', '-p', is_flag=True, help='Show path before ID in output')
-@click.argument('files', nargs=-1, type=click.Path(exists=True))
+@click.argument('files', nargs=-1, type=click.Path(exists=False))  # Changed to exists=False to handle our own errors
 def main(recursive: bool, absolute: bool, links: bool, depth: int,
          metadata: bool, verbose: bool, path_first: bool, files: tuple[str]) -> None:
-    """Generate C4 IDs for files and data.
-    
-    If no files are provided, reads from standard input.
-    """
+    """Generate C4 IDs for files and data."""
+    # Handle stdin when no files provided
     if not files:
         if not sys.stdin.isatty():
-            id_obj = identify(sys.stdin.buffer)
-            if id_obj:
-                click.echo(str(id_obj))
-        else:
-            ctx = click.get_current_context()
-            click.echo(ctx.get_help())
+            try:
+                id_obj = identify(sys.stdin.buffer)
+                if id_obj:
+                    click.echo(str(id_obj))
+            except Exception as e:
+                click.echo(f"Error processing stdin: {e}", err=True)
+                sys.exit(1)
         return
 
+    # Process each file
+    exit_status = 0
     for path in files:
-        if os.path.isdir(path) and recursive:
-            results = process_directory(path, links, depth, absolute)
-            for file_path, file_id in results:
-                click.echo(format_output(file_path, file_id, verbose, path_first))
-        else:
-            file_id = identify_file(path)
-            if file_id:
-                click.echo(format_output(path, file_id, verbose, path_first))
+        if not os.path.exists(path):
+            click.echo(f"Error: Path '{path}' does not exist.", err=True)
+            exit_status = 1
+            continue
 
-if __name__ == '__main__':
-    main()
+        try:
+            if os.path.isdir(path) and recursive:
+                results = process_directory(path, links, depth, absolute)
+                for file_path, file_id in results:
+                    click.echo(format_output(file_path, file_id, verbose, path_first, metadata))
+            else:
+                file_id = identify_file(path)
+                if file_id:
+                    click.echo(format_output(path, file_id, verbose, path_first, metadata))
+        except Exception as e:
+            click.echo(f"Error processing {path}: {e}", err=True)
+            exit_status = 1
+
+    if exit_status != 0:
+        sys.exit(exit_status)
