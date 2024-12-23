@@ -4,6 +4,7 @@ import io
 from c4py import ID, Digest, Encoder, identify, NIL_ID, VOID_ID, MAX_ID
 from c4py.errors import ErrBadChar, ErrBadLength
 
+
 def test_id_parse():
     """Test parsing valid and invalid C4 IDs"""
     # Valid ID
@@ -22,6 +23,7 @@ def test_id_parse():
     # Not starting with c4
     with pytest.raises(ErrBadChar):
         ID.parse("d4" + "1" * 88)
+
 
 def test_digest_creation():
     """Test creating digests with different inputs"""
@@ -43,132 +45,149 @@ def test_digest_creation():
     digest = Digest(long_data)
     assert digest is None
 
+
 def test_encoder():
     """Test the Encoder class"""
     encoder = Encoder()
-    
+
     # Test writing and getting ID
     test_data = b"Hello, World!"
     encoder.write(test_data)
     id1 = encoder.id()
-    
+
     # Test reset and re-writing
     encoder.reset()
     encoder.write(test_data)
     id2 = encoder.id()
-    
+
     assert id1 == id2
     assert isinstance(id1, ID)
+
 
 def test_identify_file(temp_file):
     """Test identifying a file"""
     path, content = temp_file
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         id_obj = identify(f)
-    
+
     # Test the same content with string IO
     str_io = io.BytesIO(content.encode())
     id_obj2 = identify(str_io)
-    
+
     assert id_obj == id_obj2
     assert isinstance(id_obj, ID)
+
 
 def test_constants():
     """Test the predefined constants"""
     assert NIL_ID is not None
     assert VOID_ID is not None
     assert MAX_ID is not None
-    
+
     # NIL_ID should be the ID of empty input
     empty_io = io.BytesIO(b"")
     assert identify(empty_io) == NIL_ID
-    
+
     # VOID_ID should be the ID of 64 zero bytes
     assert len(VOID_ID.digest()) == 64
     assert all(b == 0 for b in VOID_ID.digest())
-    
+
     # MAX_ID should be the ID of 64 0xFF bytes
     assert len(MAX_ID.digest()) == 64
     assert all(b == 0xFF for b in MAX_ID.digest())
+
 
 def test_digest_sum():
     """Test the sum operation of digests"""
     d1 = Digest(bytes([1] * 64))
     d2 = Digest(bytes([2] * 64))
     d3 = d1.sum(d2)
-    
+
     assert isinstance(d3, Digest)
     assert len(d3) == 64
-    
+
     # Sum should be commutative
     d4 = d2.sum(d1)
     assert d3 == d4
-    
+
     # Sum with self should return self
     assert d1.sum(d1) == d1
+
 
 def test_digest_edge_cases():
     """Test edge cases in Digest handling"""
     # Test empty digest
-    empty_digest = Digest(b'')
+    empty_digest = Digest(b"")
     assert len(empty_digest) == 64
     assert all(b == 0 for b in empty_digest)
-    
+
     # Test oversized input
     oversized = bytes([1] * 65)
     assert Digest(oversized) is None
 
+
 def test_id_basic_comparisons():
     """Test edge cases in ID comparison"""
-    id1 = ID.parse("c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1")
-    
+    id1 = ID.parse(
+        "c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1"
+    )
+
     # Test comparison with None
     assert id1 is not None
     assert not (id1 < None)
-    
+
     # Test equality with same ID
-    id2 = ID.parse("c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1")
+    id2 = ID.parse(
+        "c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1"
+    )
     assert id1 == id2
+
 
 def test_nil_id_handling():
     """Test handling of nil IDs"""
     from c4py.id import NIL_ID
+
     assert NIL_ID is not None
     # Test nil ID string representation
     assert len(str(NIL_ID)) == 90
-    assert str(NIL_ID).startswith('c4')
+    assert str(NIL_ID).startswith("c4")
+
 
 def test_digest_sum_edge_cases():
     """Test edge cases in digest sum operation"""
     from c4py.id import Digest
+
     # Create two identical digests
     d1 = Digest(bytes([1] * 64))
     d2 = Digest(bytes([1] * 64))
     # Sum should return either digest when they're identical
     assert d1.sum(d2) == d1
 
+
 def test_encoder_error_handling():
     """Test encoder error conditions"""
     from c4py import Encoder
+
     encoder = Encoder()
     # Test reset after write
-    encoder.write(b'test')
+    encoder.write(b"test")
     encoder.reset()
     # Verify reset worked by checking ID
     id1 = encoder.id()
-    encoder.write(b'test')
+    encoder.write(b"test")
     id2 = encoder.id()
     assert id1 != id2
+
 
 # Update test_id_comparison_edge_cases
 def test_id_nil_comparisons():
     """Test edge cases in ID comparison"""
     from c4py.id import NIL_ID
-    
+
     # Compare with None
     assert not (NIL_ID < None)
     assert NIL_ID is not None
-    
+
     # Compare with same ID
     id1 = NIL_ID
     id2 = NIL_ID
@@ -176,71 +195,77 @@ def test_id_nil_comparisons():
     assert not (id1 < id2)
     assert not (id2 < id1)
 
+
 def test_id_edge_cases():
     """Test edge cases in ID creation and handling"""
     # Test ID with zero value
     zero_id = ID(0)
     assert str(zero_id) == ""
-    
+
     # Test empty string parse
     with pytest.raises(ErrBadLength):
         ID.parse("")
+
 
 def test_digest_comparison():
     """Test digest comparison operations"""
     d1 = Digest(bytes([1] * 64))
     d2 = Digest(bytes([2] * 64))
-    
+
     # Test less than comparison
     assert d1 < d2
     assert not (d2 < d1)
-    
+
     # Test equality
     d3 = Digest(bytes([1] * 64))
     assert d1 == d3
     assert not (d1 < d3)
 
+
 def test_encoder_large_data():
     """Test encoder with large data chunks"""
     encoder = Encoder()
-    
+
     # Write large chunk of data
     large_data = bytes([x % 256 for x in range(1000000)])
     written = encoder.write(large_data)
     assert written == len(large_data)
-    
+
     # Get ID and verify it's valid
     id_obj = encoder.id()
     assert isinstance(id_obj, ID)
     assert len(str(id_obj)) == 90
-    
+
     # Get digest and verify
     digest = encoder.digest()
     assert isinstance(digest, Digest)
     assert len(digest) == 64
+
 
 def test_id_value_edge_cases():
     """Test ID creation with edge case values (line 61)"""
     # Create an ID with value 0, which should result in empty string
     id_obj = ID(0)
     assert str(id_obj) == ""
-    
+
     # Test with a small positive value to ensure encoding works
     id_obj = ID(1)
-    assert str(id_obj).startswith('c4')
+    assert str(id_obj).startswith("c4")
     assert len(str(id_obj)) == 90
+
 
 def test_digest_invalid_bytes():
     """Test Digest creation with invalid bytes (line 123)"""
     # Test with empty bytes
-    empty_digest = Digest(b'')
+    empty_digest = Digest(b"")
     assert len(empty_digest) == 64
     assert all(b == 0 for b in empty_digest)
-    
+
     # Test with bytes that are too long (line 123 case)
     too_long = bytes([1] * 65)
     invalid_digest = Digest(too_long)
     assert invalid_digest is None
+
 
 def test_id_parse_invalid_char():
     """Test ID.parse with an invalid character in the ID string (line 61)"""
@@ -249,16 +274,17 @@ def test_id_parse_invalid_char():
         ID.parse(test_id)
     assert exc.value.pos == 89  # The invalid char is at position 89
 
+
 def test_digest_overflow():
     """Test creating a digest that would overflow (line 123)"""
     # Create a large bytes object
-    max_bytes = b'\xff' * 64
+    max_bytes = b"\xff" * 64
     digest = Digest(max_bytes)
-    
+
     # Try to create a new ID from this digest
     id_obj = digest.id()
     assert isinstance(id_obj, ID)
-    
+
     # Now try to create a new digest from this ID
     # This should hit line 123 as we manipulate the internal value
     result = id_obj.digest()

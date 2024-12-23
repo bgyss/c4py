@@ -4,15 +4,17 @@ import os
 import tempfile
 from typing import Generator, Tuple
 
+
 @pytest.fixture
 def temp_file() -> Generator[Tuple[str, str], None, None]:
     """Creates a temporary file with content and returns (path, content)"""
     fd, path = tempfile.mkstemp()
     content = "This is test content"
-    with os.fdopen(fd, 'w') as f:
+    with os.fdopen(fd, "w") as f:
         f.write(content)
     yield path, content
     os.unlink(path)
+
 
 @pytest.fixture
 def temp_dir() -> Generator[str, None, None]:
