@@ -6,25 +6,52 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+      fail-fast: false  # Continue with other versions if one fails
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+      env:
+        GIT_TRACE: 1
+
+    - name: Debug workspace
+      run: |
+        pwd
+        ls -la
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
 
     - name: Install uv
       run: |
         curl -LsSf https://astral.sh/uv/install.sh | sh
         echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Cache uv dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/uv
+          ~/.cargo/bin/uv
+        key: ${{ runner.os }}-uv-${{ hashFiles('pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-uv-
 
     - name: Install dependencies
       run: |
@@ -32,11 +59,11 @@ jobs:
 
     - name: Run Ruff check
       run: |
-        ruff check .
+        ruff check . || exit 1
 
     - name: Run Ruff format
       run: |
-        ruff format --check .
+        ruff format --check . || exit 1
 
     - name: Run tests with pytest
       run: |
