@@ -59,7 +59,7 @@ jobs:
     - name: Install dependencies
       run: |
         . .venv/bin/activate
-        uv pip install -e ".[dev]"
+        uv sync --dev
 
     - name: Run Ruff check & fix
       run: |
