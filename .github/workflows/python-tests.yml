@@ -61,24 +61,6 @@ jobs:
         . .venv/bin/activate
         uv sync --dev
 
-    - name: Run Ruff check & fix
-      run: |
-        . .venv/bin/activate
-        ruff check . --fix
-        ruff format .
-        
-    - name: Commit and push changes
-      run: |
-        git config --global user.name 'GitHub Actions Bot'
-        git config --global user.email 'actions@github.com'
-        if [[ -n $(git status --porcelain) ]]; then
-          git add .
-          git commit -m "Auto-fix code style issues"
-          git push
-        else
-          echo "No changes to commit"
-        fi
-
     - name: Run tests with pytest
       run: |
         . .venv/bin/activate
@@ -88,4 +70,68 @@ jobs:
       uses: codecov/codecov-action@v5
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  lint:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Create cache directories
+      run: |
+        mkdir -p ~/.cache/pip
+        mkdir -p ~/.cache/uv
+
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.cache/uv
+          .venv
+        key: ${{ runner.os }}-py3.12-lint-${{ hashFiles('pyproject.toml') }}
+        restore-keys: |
+          ${{ runner.os }}-py3.12-lint-
+
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - name: Create and activate virtual environment
+      run: |
+        uv venv
+        . .venv/bin/activate
+
+    - name: Install dependencies
+      run: |
+        . .venv/bin/activate
+        uv sync --dev
+
+    - name: Run Ruff check & fix
+      run: |
+        . .venv/bin/activate
+        ruff check . --fix
+        ruff format .
         
+    - name: Commit and push changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        if [[ -n $(git status --porcelain) ]]; then
+          git add .
+          git commit -m "Auto-fix code style issues"
+          git push
+        else
+          echo "No changes to commit"
+        fi
