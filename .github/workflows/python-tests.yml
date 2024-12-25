@@ -42,9 +42,10 @@ jobs:
           ~/.cache/pip
           ~/.cache/uv
           .venv
-        key: ${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
+        key: ${{ runner.os }}-python-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
         restore-keys: |
-          ${{ runner.os }}-py${{ matrix.python-version }}-
+          ${{ runner.os }}-python-${{ matrix.python-version }}-
+          ${{ runner.os }}-python-
 
     - name: Install uv
       run: |
@@ -99,9 +100,10 @@ jobs:
           ~/.cache/pip
           ~/.cache/uv
           .venv
-        key: ${{ runner.os }}-py3.12-lint-${{ hashFiles('pyproject.toml') }}
+        key: ${{ runner.os }}-python-3.12-${{ hashFiles('pyproject.toml') }}
         restore-keys: |
-          ${{ runner.os }}-py3.12-lint-
+          ${{ runner.os }}-python-3.12-
+          ${{ runner.os }}-python-
 
     - name: Install uv
       run: |
