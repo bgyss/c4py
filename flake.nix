@@ -15,6 +15,9 @@
         python = pkgs.python312;
         pythonPackages = python.pkgs;
         
+        # Tools
+        uv = pkgs.uv;
+        
         # Development dependencies from pyproject.toml
         devDependencies = with pythonPackages; [
           # Core dependencies
@@ -98,12 +101,12 @@
             echo "UV: $(uv --version)"
             echo ""
             echo "Available commands:"
-            echo "  uv sync --dev     - Install dependencies"
-            echo "  pytest           - Run tests"
-            echo "  ruff check .     - Run linting"
-            echo "  ruff format .    - Format code"
-            echo "  uv run ty check . - Type checking"
-            echo "  c4py --help      - Run the CLI tool"
+            echo "  uv sync --dev         - Install dependencies"
+            echo "  uv run pytest         - Run tests"
+            echo "  uv run ruff check .   - Run linting"
+            echo "  uv run ruff format .  - Format code"
+            echo "  uv run ty check .     - Type checking"
+            echo "  uv run c4py --help    - Run the CLI tool"
             echo ""
             
             # Only show setup instructions if .venv doesn't exist
