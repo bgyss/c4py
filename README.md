@@ -173,7 +173,7 @@ direnv allow
 The Nix environment includes:
 - Python 3.12 with all dependencies
 - UV for fast package management
-- Development tools: ruff, mypy, pytest, black, isort
+- Development tools: ruff, ty, pytest, black, isort
 - Git, GitHub CLI, and Just task runner
 
 #### Option 2: Traditional Python Setup
@@ -197,7 +197,7 @@ just test-fast   # Run tests without coverage
 just lint        # Check code with ruff
 just format      # Format code with ruff
 just fix         # Auto-fix issues and format
-just typecheck   # Type check with mypy
+just typecheck   # Type check with ty
 just check       # Run all quality checks
 just build       # Build package with Nix
 just clean       # Clean build artifacts
@@ -210,20 +210,20 @@ just clean       # Clean build artifacts
 uv sync --dev  # or pip install -e ".[dev]"
 
 # Run tests
-pytest
-pytest --cov=c4py --cov-report=xml  # with coverage
+uv run pytest
+uv run pytest --cov=c4py --cov-report=xml  # with coverage
 
 # Code quality
-ruff check .     # linting
-ruff format .    # formatting
-mypy .           # type checking
+uv run ruff check .     # linting
+uv run ruff format .    # formatting
+uv run ty check .       # type checking
 ```
 
 ### Code Style
 
 The project uses:
 - **ruff** for linting and formatting (primary)
-- **mypy** for type checking
+- **ty** for type checking
 - **pytest** for testing
 - Legacy tools also available: black, isort, flake8
 

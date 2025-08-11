@@ -52,7 +52,7 @@ just test-fast    # Run tests without coverage
 just lint         # Check code with ruff
 just format       # Format code with ruff
 just fix          # Auto-fix issues and format
-just typecheck    # Type check with mypy
+just typecheck    # Type check with ty
 just check        # Run all quality checks (lint + typecheck + test)
 
 # Package management
@@ -69,36 +69,36 @@ just             # Show all available commands
 
 #### Testing
 ```bash
-# Run all tests with coverage
-pytest --cov=c4py --cov-report=xml
+# Run all tests with coverage using uv
+uv run pytest --cov=c4py --cov-report=xml
 
 # Run tests without coverage
-pytest
+uv run pytest
 
 # Run specific test file
-pytest tests/test_id.py
+uv run pytest tests/test_id.py
 
 # Run specific test function
-pytest tests/test_id.py::test_id_parsing
+uv run pytest tests/test_id.py::test_id_parsing
 ```
 
 #### Code Quality and Linting
 ```bash
 # Run ruff linting (check only)
-ruff check .
+uv run ruff check .
 
 # Run ruff with auto-fix
-ruff check . --fix
+uv run ruff check . --fix
 
 # Format code with ruff
-ruff format .
+uv run ruff format .
 
-# Run mypy type checking
-mypy .
+# Run ty type checking
+uv run ty check .
 
 # Run all style checks (legacy tools also available)
-black .
-isort .
+uv run black .
+uv run isort .
 ```
 
 #### Package Management
@@ -173,7 +173,7 @@ Tests are organized by module in the `tests/` directory:
 - **Task Runner**: Just for common development tasks
 - **CI/CD**: GitHub Actions with Python matrix testing and codecov integration
 - **Code Style**: Ruff for linting and formatting (88 char line length)
-- **Type Checking**: mypy with strict configuration requiring type annotations
+- **Type Checking**: ty with strict configuration requiring type annotations
 
 ### Nix Flake Features
 

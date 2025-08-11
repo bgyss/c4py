@@ -29,9 +29,9 @@ fix:
     ruff check . --fix
     ruff format .
 
-# Type check with mypy
+# Type check with ty
 typecheck:
-    mypy .
+    uv run ty check .
 
 # Run all quality checks
 check: lint typecheck test

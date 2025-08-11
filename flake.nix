@@ -25,7 +25,7 @@
           flake8
           isort
           mkdocs-material
-          mypy
+          # ty is not available in nixpkgs yet, will use uv to install
           pytest
           pytest-cov
           ruff
@@ -102,23 +102,15 @@
             echo "  pytest           - Run tests"
             echo "  ruff check .     - Run linting"
             echo "  ruff format .    - Format code"
-            echo "  mypy .           - Type checking"
+            echo "  uv run ty check . - Type checking"
             echo "  c4py --help      - Run the CLI tool"
             echo ""
             
-            # Create .venv if it doesn't exist and activate it
+            # Only show setup instructions if .venv doesn't exist
             if [ ! -d ".venv" ]; then
-              echo "Creating virtual environment..."
-              uv venv
-            fi
-            
-            # Activate virtual environment
-            source .venv/bin/activate
-            
-            # Install package in development mode
-            if [ ! -f ".venv/pyvenv.cfg" ] || ! grep -q "c4py" .venv/lib/python*/site-packages/easy-install.pth 2>/dev/null; then
-              echo "Installing c4py in development mode..."
-              uv sync --dev
+              echo "⚠️  Virtual environment not found."
+              echo "   Run: uv venv && source .venv/bin/activate && uv sync --dev"
+              echo ""
             fi
           '';
 
@@ -170,15 +162,16 @@
             touch $out
           '';
 
-          # Type checking
-          mypy-check = pkgs.runCommand "c4py-mypy-check" {
-            buildInputs = [ python pythonPackages.mypy ] ++ devDependencies;
+          # Type checking with ty (using uv since ty not in nixpkgs)
+          ty-check = pkgs.runCommand "c4py-ty-check" {
+            buildInputs = [ python uv ] ++ devDependencies;
           } ''
             cp -r ${builtins.path { path = ./.; name = "c4py-source"; }} source
             cd source
             chmod -R +w .
-            export MYPY_CACHE_DIR=$(mktemp -d)
-            mypy .
+            export UV_CACHE_DIR=$(mktemp -d)
+            ${uv}/bin/uv sync --dev
+            ${uv}/bin/uv run ty check .
             touch $out
           '';
         };
