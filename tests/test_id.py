@@ -297,17 +297,17 @@ def test_digest_overflow() -> None:
 def test_id_equality_with_non_id() -> None:
     """Test ID equality comparison with non-ID objects (line 61)"""
     id_obj = ID.parse("c4" + "1" * 88)
-    
+
     # Compare with non-ID objects should return NotImplemented
     result = id_obj.__eq__("string")
     assert result is NotImplemented
-    
+
     result = id_obj.__eq__(42)
     assert result is NotImplemented
-    
+
     result = id_obj.__eq__(None)
     assert result is NotImplemented
-    
+
     # Compare with another ID should work normally
     other_id = ID.parse("c4" + "2" * 88)
     assert id_obj != other_id
@@ -318,14 +318,14 @@ def test_encode_function() -> None:
     """Test the encode function (line 127)"""
     from c4py.id import encode
     import io
-    
+
     # Test with some data
     test_data = b"test data for encoding"
     src = io.BytesIO(test_data)
-    
+
     result = encode(src)
     assert isinstance(result, ID)
-    
+
     # Should be the same as calling identify
     src2 = io.BytesIO(test_data)
     result2 = identify(src2)

@@ -274,7 +274,9 @@ def test_cli_absolute_path_flag(runner: CliRunner, temp_dir: str) -> None:
     assert os.path.isabs(parts[1])
 
 
-def test_cli_directory_exception_handling(runner: CliRunner, temp_dir: str, monkeypatch) -> None:
+def test_cli_directory_exception_handling(
+    runner: CliRunner, temp_dir: str, monkeypatch
+) -> None:
     """Test exception handling in directory processing"""
     # Create a test file
     test_file = os.path.join(temp_dir, "test.txt")
@@ -286,7 +288,7 @@ def test_cli_directory_exception_handling(runner: CliRunner, temp_dir: str, monk
         raise PermissionError("Mocked permission error")
 
     monkeypatch.setattr("os.walk", mock_walk)
-    
+
     result = runner.invoke(main, ["-R", temp_dir])
     assert result.exit_code == 0
     assert "Error processing directory" in result.output
@@ -295,28 +297,31 @@ def test_cli_directory_exception_handling(runner: CliRunner, temp_dir: str, monk
 
 def test_cli_stdin_exception_handling(runner: CliRunner, monkeypatch) -> None:
     """Test exception handling for stdin processing"""
+
     # Mock identify function to raise an exception
     def mock_identify(src):
         raise ValueError("Mocked processing error")
 
     monkeypatch.setattr("c4py.cli.identify", mock_identify)
-    
+
     result = runner.invoke(main, input="test data")
     assert result.exit_code == 1
     assert "Error processing stdin" in result.output
     assert "Mocked processing error" in result.output
 
 
-def test_cli_file_processing_exception(runner: CliRunner, temp_file, monkeypatch) -> None:
+def test_cli_file_processing_exception(
+    runner: CliRunner, temp_file, monkeypatch
+) -> None:
     """Test exception handling for file processing"""
     path, _ = temp_file
-    
+
     # Mock identify_file to raise an exception
     def mock_identify_file(file_path):
         raise IOError("Mocked file error")
 
     monkeypatch.setattr("c4py.cli.identify_file", mock_identify_file)
-    
+
     result = runner.invoke(main, [path])
     assert result.exit_code == 1
     assert "Error processing" in result.output
