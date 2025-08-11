@@ -1,11 +1,11 @@
 [project]
 name = "c4py"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python implementation of the C4 ID system - content-addressable identifiers using SHA-512 hashing and Base58 encoding"
 readme = "README.md"
 authors = [
-    { name = "Brian Gyss", email = "brian.gyss@thesphere.com" },
-    { name = "Claude Sonnet 3.5", email = "support@anthropic.com" }
+    { name = "Brian Gyss", email = "bgyss@hey.com" },
+    { name = "Claude Code", email = "support@anthropic.com" }
 ]
 requires-python = ">=3.8"
 classifiers = [
