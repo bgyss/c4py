@@ -20,3 +20,6 @@ htmlcov/
 result
 result-*
 .direnv/
+
+# Claude Code
+.claude/
