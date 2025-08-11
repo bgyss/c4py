@@ -149,7 +149,9 @@ def main(
                 single_file_id = identify_file(path)
                 if single_file_id is not None:
                     click.echo(
-                        format_output(path, single_file_id, verbose, path_first, metadata)
+                        format_output(
+                            path, single_file_id, verbose, path_first, metadata
+                        )
                     )
         except Exception as e:
             click.echo(f"Error processing {path}: {e}", err=True)
