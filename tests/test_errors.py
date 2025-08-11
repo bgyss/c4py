@@ -2,20 +2,20 @@
 from c4py.errors import ErrBadChar, ErrBadLength, ErrNil, ErrInvalidTree
 
 
-def test_error_messages():
+def test_error_messages() -> None:
     """Test error message formatting"""
     # Test ErrBadChar
-    err = ErrBadChar(5)
-    assert str(err) == "non c4 id character at position 5"
+    err_bad_char = ErrBadChar(5)
+    assert str(err_bad_char) == "non c4 id character at position 5"
 
     # Test ErrBadLength
-    err = ErrBadLength(50)
-    assert str(err) == "c4 ids must be 90 characters long, input length 50"
+    err_bad_length = ErrBadLength(50)
+    assert str(err_bad_length) == "c4 ids must be 90 characters long, input length 50"
 
     # Test ErrNil
-    err = ErrNil()
-    assert str(err) == "unexpected nil id"
+    err_nil = ErrNil()
+    assert str(err_nil) == "unexpected nil id"
 
     # Test ErrInvalidTree
-    err = ErrInvalidTree()
-    assert str(err) == "invalid tree data"
+    err_invalid_tree = ErrInvalidTree()
+    assert str(err_invalid_tree) == "invalid tree data"

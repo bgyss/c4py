@@ -1,11 +1,12 @@
 # tests/test_id.py
 import pytest
 import io
+from typing import Tuple
 from c4py import ID, Digest, Encoder, identify, NIL_ID, VOID_ID, MAX_ID
 from c4py.errors import ErrBadChar, ErrBadLength
 
 
-def test_id_parse():
+def test_id_parse() -> None:
     """Test parsing valid and invalid C4 IDs"""
     # Valid ID
     valid_id = "c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1"
@@ -25,7 +26,7 @@ def test_id_parse():
         ID.parse("d4" + "1" * 88)
 
 
-def test_digest_creation():
+def test_digest_creation() -> None:
     """Test creating digests with different inputs"""
     # Valid 64-byte digest
     data = bytes([1] * 64)
@@ -40,13 +41,13 @@ def test_digest_creation():
     expected = bytes([0] * 32) + short_data
     assert digest == expected
 
-    # Too long input should return None
+    # Too long input should raise ValueError
     long_data = bytes([1] * 65)
-    digest = Digest(long_data)
-    assert digest is None
+    with pytest.raises(ValueError):
+        Digest(long_data)
 
 
-def test_encoder():
+def test_encoder() -> None:
     """Test the Encoder class"""
     encoder = Encoder()
 
@@ -64,7 +65,7 @@ def test_encoder():
     assert isinstance(id1, ID)
 
 
-def test_identify_file(temp_file):
+def test_identify_file(temp_file: Tuple[str, str]) -> None:
     """Test identifying a file"""
     path, content = temp_file
     with open(path, "rb") as f:
@@ -78,7 +79,7 @@ def test_identify_file(temp_file):
     assert isinstance(id_obj, ID)
 
 
-def test_constants():
+def test_constants() -> None:
     """Test the predefined constants"""
     assert NIL_ID is not None
     assert VOID_ID is not None
@@ -97,7 +98,7 @@ def test_constants():
     assert all(b == 0xFF for b in MAX_ID.digest())
 
 
-def test_digest_sum():
+def test_digest_sum() -> None:
     """Test the sum operation of digests"""
     d1 = Digest(bytes([1] * 64))
     d2 = Digest(bytes([2] * 64))
@@ -114,7 +115,7 @@ def test_digest_sum():
     assert d1.sum(d1) == d1
 
 
-def test_digest_edge_cases():
+def test_digest_edge_cases() -> None:
     """Test edge cases in Digest handling"""
     # Test empty digest
     empty_digest = Digest(b"")
@@ -123,10 +124,11 @@ def test_digest_edge_cases():
 
     # Test oversized input
     oversized = bytes([1] * 65)
-    assert Digest(oversized) is None
+    with pytest.raises(ValueError):
+        Digest(oversized)
 
 
-def test_id_basic_comparisons():
+def test_id_basic_comparisons() -> None:
     """Test edge cases in ID comparison"""
     id1 = ID.parse(
         "c43zYcLni5LF9rR4Lg4B8h3Jp8SBwjcnyyeh4bc6gTPHndKuKdjUWx1kJPYhZxYt3zV6tQXpDs2shPsPYjgG81wZM1"
@@ -143,7 +145,7 @@ def test_id_basic_comparisons():
     assert id1 == id2
 
 
-def test_nil_id_handling():
+def test_nil_id_handling() -> None:
     """Test handling of nil IDs"""
     from c4py.id import NIL_ID
 
@@ -153,7 +155,7 @@ def test_nil_id_handling():
     assert str(NIL_ID).startswith("c4")
 
 
-def test_digest_sum_edge_cases():
+def test_digest_sum_edge_cases() -> None:
     """Test edge cases in digest sum operation"""
     from c4py.id import Digest
 
@@ -164,7 +166,7 @@ def test_digest_sum_edge_cases():
     assert d1.sum(d2) == d1
 
 
-def test_encoder_error_handling():
+def test_encoder_error_handling() -> None:
     """Test encoder error conditions"""
     from c4py import Encoder
 
@@ -180,13 +182,13 @@ def test_encoder_error_handling():
 
 
 # Update test_id_comparison_edge_cases
-def test_id_nil_comparisons():
+def test_id_nil_comparisons() -> None:
     """Test edge cases in ID comparison"""
     from c4py.id import NIL_ID
 
     # Compare with None
-    assert not (NIL_ID < None)
     assert NIL_ID is not None
+    assert not (NIL_ID < None)
 
     # Compare with same ID
     id1 = NIL_ID
@@ -196,7 +198,7 @@ def test_id_nil_comparisons():
     assert not (id2 < id1)
 
 
-def test_id_edge_cases():
+def test_id_edge_cases() -> None:
     """Test edge cases in ID creation and handling"""
     # Test ID with zero value
     zero_id = ID(0)
@@ -207,7 +209,7 @@ def test_id_edge_cases():
         ID.parse("")
 
 
-def test_digest_comparison():
+def test_digest_comparison() -> None:
     """Test digest comparison operations"""
     d1 = Digest(bytes([1] * 64))
     d2 = Digest(bytes([2] * 64))
@@ -222,7 +224,7 @@ def test_digest_comparison():
     assert not (d1 < d3)
 
 
-def test_encoder_large_data():
+def test_encoder_large_data() -> None:
     """Test encoder with large data chunks"""
     encoder = Encoder()
 
@@ -242,7 +244,7 @@ def test_encoder_large_data():
     assert len(digest) == 64
 
 
-def test_id_value_edge_cases():
+def test_id_value_edge_cases() -> None:
     """Test ID creation with edge case values (line 61)"""
     # Create an ID with value 0, which should result in empty string
     id_obj = ID(0)
@@ -254,7 +256,7 @@ def test_id_value_edge_cases():
     assert len(str(id_obj)) == 90
 
 
-def test_digest_invalid_bytes():
+def test_digest_invalid_bytes() -> None:
     """Test Digest creation with invalid bytes (line 123)"""
     # Test with empty bytes
     empty_digest = Digest(b"")
@@ -263,11 +265,11 @@ def test_digest_invalid_bytes():
 
     # Test with bytes that are too long (line 123 case)
     too_long = bytes([1] * 65)
-    invalid_digest = Digest(too_long)
-    assert invalid_digest is None
+    with pytest.raises(ValueError):
+        Digest(too_long)
 
 
-def test_id_parse_invalid_char():
+def test_id_parse_invalid_char() -> None:
     """Test ID.parse with an invalid character in the ID string (line 61)"""
     test_id = "c4" + "1" * 87 + "0"  # "0" is not in the valid charset
     with pytest.raises(ErrBadChar) as exc:
@@ -275,7 +277,7 @@ def test_id_parse_invalid_char():
     assert exc.value.pos == 89  # The invalid char is at position 89
 
 
-def test_digest_overflow():
+def test_digest_overflow() -> None:
     """Test creating a digest that would overflow (line 123)"""
     # Create a large bytes object
     max_bytes = b"\xff" * 64

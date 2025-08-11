@@ -1,5 +1,6 @@
 # tests/test_cli.py
 import pytest
+from typing import Any
 from click.testing import CliRunner
 import os
 from c4py.cli import main
@@ -7,12 +8,12 @@ from c4py import NIL_ID
 
 
 @pytest.fixture
-def runner():
+def runner() -> CliRunner:
     """Fixture for invoking command-line interfaces"""
     return CliRunner()
 
 
-def test_cli_version(runner):
+def test_cli_version(runner: CliRunner) -> None:
     """Test version flag output"""
     result = runner.invoke(main, ["--version"])
     assert result.exit_code == 0
@@ -20,14 +21,14 @@ def test_cli_version(runner):
     assert "0.1.0" in result.output
 
 
-def test_cli_help(runner):
+def test_cli_help(runner: CliRunner) -> None:
     """Test help output"""
     result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
     assert "Usage:" in result.output
 
 
-def test_cli_file_identification(runner, temp_file):
+def test_cli_file_identification(runner: CliRunner, temp_file: Any) -> None:
     """Test CLI file identification"""
     path, _ = temp_file
 
@@ -47,7 +48,7 @@ def test_cli_file_identification(runner, temp_file):
     assert parts[0] == output, "IDs should match between verbose and non-verbose output"
 
 
-def test_cli_recursive(runner, temp_dir):
+def test_cli_recursive(runner: CliRunner, temp_dir: str) -> None:
     """Test CLI recursive directory scanning"""
     # Create some test files
     for i in range(3):
@@ -73,7 +74,7 @@ def test_cli_recursive(runner, temp_dir):
     assert len(output_lines_verbose) == 3
 
 
-def test_path_first_format(runner, temp_file):
+def test_path_first_format(runner: CliRunner, temp_file: Any) -> None:
     """Test path-first formatting option"""
     path, _ = temp_file
     result = runner.invoke(main, ["--verbose", "--path-first", path])
@@ -84,7 +85,7 @@ def test_path_first_format(runner, temp_file):
     ), "Output should start with path when using --path-first"
 
 
-def test_cli_file_not_found(runner):
+def test_cli_file_not_found(runner: CliRunner) -> None:
     """Test handling of non-existent files"""
     result = runner.invoke(main, ["nonexistent_file.txt"])
     assert result.exit_code != 0
@@ -92,7 +93,7 @@ def test_cli_file_not_found(runner):
     assert "nonexistent_file.txt" in result.output
 
 
-def test_cli_stdin_handling(runner):
+def test_cli_stdin_handling(runner: CliRunner) -> None:
     """Test handling of stdin input"""
     # Test with stdin data
     result = runner.invoke(main, input="test data")
@@ -100,7 +101,7 @@ def test_cli_stdin_handling(runner):
     assert len(result.output.strip()) == 90  # Should be a valid C4 ID
 
 
-def test_cli_directory_errors(runner, temp_dir):
+def test_cli_directory_errors(runner: CliRunner, temp_dir: str) -> None:
     """Test directory processing error handling"""
     # Create a directory with insufficient permissions
     restricted_dir = os.path.join(temp_dir, "restricted")
@@ -115,7 +116,7 @@ def test_cli_directory_errors(runner, temp_dir):
         os.chmod(restricted_dir, 0o755)  # Restore permissions for cleanup
 
 
-def test_cli_metadata_output(runner, temp_file):
+def test_cli_metadata_output(runner: CliRunner, temp_file: Any) -> None:
     """Test metadata output functionality"""
     path, _ = temp_file
     result = runner.invoke(main, ["--metadata", "--verbose", path])
@@ -126,7 +127,7 @@ def test_cli_metadata_output(runner, temp_file):
     assert str(file_size) in result.output
 
 
-def test_cli_stdin_with_errors(runner):
+def test_cli_stdin_with_errors(runner: CliRunner) -> None:
     """Test CLI stdin handling with error conditions"""
     # Test with empty input
     result = runner.invoke(main, input="")
@@ -139,7 +140,7 @@ def test_cli_stdin_with_errors(runner):
     assert len(result.output.strip()) == 90
 
 
-def test_cli_metadata_formatting(runner, temp_file):
+def test_cli_metadata_formatting(runner: CliRunner, temp_file: Any) -> None:
     """Test different metadata formatting options"""
     path, _ = temp_file
 
@@ -154,7 +155,7 @@ def test_cli_metadata_formatting(runner, temp_file):
     assert "ID:" in result.output
 
 
-def test_cli_recursive_depth_limit(runner, temp_dir):
+def test_cli_recursive_depth_limit(runner: CliRunner, temp_dir: str) -> None:
     """Test recursive processing with depth limit"""
     # Create nested directory structure
     subdir = os.path.join(temp_dir, "subdir")
@@ -175,7 +176,7 @@ def test_cli_recursive_depth_limit(runner, temp_dir):
     assert len(result.output.strip().split("\n")) == 2  # root + level1 only
 
 
-def test_cli_metadata_error(runner, temp_dir):
+def test_cli_metadata_error(runner: CliRunner, temp_dir: str) -> None:
     """Test metadata handling with inaccessible files"""
     file_path = os.path.join(temp_dir, "test.txt")
     with open(file_path, "w") as f:
@@ -189,7 +190,7 @@ def test_cli_metadata_error(runner, temp_dir):
         os.chmod(file_path, 0o644)
 
 
-def test_cli_non_terminal_input(runner):
+def test_cli_non_terminal_input(runner: CliRunner) -> None:
     """Test CLI with non-terminal input"""
     with runner.isolated_filesystem():
         result = runner.invoke(main, input="test data\n")
@@ -197,7 +198,7 @@ def test_cli_non_terminal_input(runner):
         assert len(result.output.strip()) == 90
 
 
-def test_cli_directory_processing_error(runner, temp_dir):
+def test_cli_directory_processing_error(runner: CliRunner, temp_dir: str) -> None:
     """Test directory processing with unreadable files"""
     # Create a file with no read permissions
     test_file = os.path.join(temp_dir, "unreadable.txt")
@@ -225,14 +226,14 @@ def test_cli_directory_processing_error(runner, temp_dir):
         os.chmod(test_file, 0o644)
 
 
-def test_cli_with_binary_input(runner):
+def test_cli_with_binary_input(runner: CliRunner) -> None:
     """Test CLI with binary input"""
     result = runner.invoke(main, input=b"\x00\xff\x80")
     assert result.exit_code == 0
     assert len(result.output.strip()) == 90
 
 
-def test_cli_multiple_files_error(runner, temp_dir):
+def test_cli_multiple_files_error(runner: CliRunner, temp_dir: str) -> None:
     """Test handling multiple files with some errors"""
     # Create good file
     good_file = os.path.join(temp_dir, "good.txt")

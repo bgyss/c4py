@@ -56,9 +56,9 @@ class ID:
         raw_bytes = self._value.to_bytes(64, "big")
         return Digest(raw_bytes)
 
-    def __eq__(self, other: Optional["ID"]) -> bool:
-        if other is None:
-            return False
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, ID):
+            return NotImplemented
         return self._value == other._value
 
     def __lt__(self, other: Optional["ID"]) -> bool:
@@ -70,7 +70,7 @@ class ID:
 class Digest(bytes):
     def __new__(cls, data: bytes) -> "Digest":
         if len(data) > 64:
-            return None
+            raise ValueError("Data too long for digest")
         if len(data) < 64:
             # Pad with zeros
             data = bytes(64 - len(data)) + data
@@ -95,7 +95,7 @@ class Digest(bytes):
 
 
 class Encoder:
-    def __init__(self):
+    def __init__(self) -> None:
         self._hasher = hashlib.sha512()
 
     def write(self, data: bytes) -> int:
@@ -109,7 +109,7 @@ class Encoder:
     def digest(self) -> Digest:
         return Digest(self._hasher.digest())
 
-    def reset(self):
+    def reset(self) -> None:
         self._hasher = hashlib.sha512()
 
 
@@ -128,7 +128,8 @@ def encode(src: BinaryIO) -> Optional[ID]:
 
 
 # Initialize constants
-NIL_ID = identify(open("/dev/null", "rb"))
+with open("/dev/null", "rb") as f:
+    NIL_ID = identify(f)
 void_bytes = bytes(64)
 VOID_ID = Digest(void_bytes).id()
 max_bytes = bytes([0xFF] * 64)

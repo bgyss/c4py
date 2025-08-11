@@ -2,7 +2,7 @@
 import os
 import datetime
 import sys
-from typing import Optional, List
+from typing import Optional, List, Tuple
 import click
 from . import identify, ID
 
@@ -69,7 +69,7 @@ def identify_file(path: str) -> Optional[ID]:
 
 def process_directory(
     path: str, follow_links: bool, depth: int, absolute: bool
-) -> List[tuple[str, ID]]:
+) -> List[Tuple[str, ID]]:
     """Process a directory recursively"""
     results = []
 
@@ -87,7 +87,7 @@ def process_directory(
                     file_path = os.path.abspath(file_path)
 
                 file_id = identify_file(file_path)
-                if file_id:
+                if file_id is not None:
                     results.append((file_path, file_id))
     except Exception as e:
         click.echo(f"Error processing directory {path}: {e}", err=True)
@@ -115,7 +115,7 @@ def main(
     metadata: bool,
     verbose: bool,
     path_first: bool,
-    files: tuple[str],
+    files: Tuple[str, ...],
 ) -> None:
     """Generate C4 IDs for files and data."""
     # Handle stdin when no files provided
@@ -146,10 +146,10 @@ def main(
                         format_output(file_path, file_id, verbose, path_first, metadata)
                     )
             else:
-                file_id = identify_file(path)
-                if file_id:
+                single_file_id = identify_file(path)
+                if single_file_id is not None:
                     click.echo(
-                        format_output(path, file_id, verbose, path_first, metadata)
+                        format_output(path, single_file_id, verbose, path_first, metadata)
                     )
         except Exception as e:
             click.echo(f"Error processing {path}: {e}", err=True)

@@ -2,7 +2,7 @@
 import importlib
 
 
-def test_main_module():
+def test_main_module() -> None:
     """Test that __main__ module can be imported and executed"""
     # Import the module
     main = importlib.import_module("c4py.__main__")
