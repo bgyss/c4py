@@ -171,6 +171,7 @@ direnv allow
 ```
 
 The Nix environment includes:
+
 - Python 3.12 with all dependencies
 - UV for fast package management
 - Development tools: ruff, ty, pytest, black, isort
@@ -181,7 +182,7 @@ The Nix environment includes:
 ```bash
 git clone https://github.com/bgyss/c4py.git
 cd c4py
-pip install -e ".[dev]"
+uv sync --dev
 ```
 
 ### Development Tasks
@@ -207,7 +208,7 @@ just clean       # Clean build artifacts
 
 ```bash
 # Install dependencies
-uv sync --dev  # or pip install -e ".[dev]"
+uv sync --dev
 
 # Run tests
 uv run pytest
@@ -222,6 +223,7 @@ uv run ty check .       # type checking
 ### Code Style
 
 The project uses:
+
 - **ruff** for linting and formatting (primary)
 - **ty** for type checking
 - **pytest** for testing
@@ -240,3 +242,12 @@ Contributions are welcome! Please feel free to submit pull requests.
 3. Commit your changes (`git commit -am 'Add awesome feature'`)
 4. Push to the branch (`git push origin feature/awesome-feature`)
 5. Create a Pull Request
+
+## Development Assistance
+
+This project was developed with the assistance of [Claude Code](https://claude.ai/code), Anthropic's AI assistant for software development. Claude Code helped with:
+
+- Project architecture and implementation
+- Test coverage improvements
+- Development environment setup (Nix flake)
+- Documentation and code quality
