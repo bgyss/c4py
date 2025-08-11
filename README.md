@@ -1,7 +1,7 @@
 # c4py
 
-![Tests](https://github.com/SphereStudios/c4py/actions/workflows/python-tests.yml/badge.svg)
-[![codecov](https://codecov.io/gh/SphereStudios/c4py/graph/badge.svg?token=VJBE7X97JW)](https://codecov.io/gh/SphereStudios/c4py)
+![Tests](https://github.com/bgyss/c4py/actions/workflows/python-tests.yml/badge.svg)
+[![codecov](https://codecov.io/gh/bgyss/c4py/graph/badge.svg?token=VJBE7X97JW)](https://codecov.io/gh/bgyss/c4py)
 
 A Python implementation of the C4 ID system, providing both a library and command-line interface for generating and working with C4 identifiers.
 
@@ -153,7 +153,7 @@ Created: 2024-03-23T14:29:55
 ### Setup Development Environment
 
 ```bash
-git clone https://github.com/yourusername/c4py.git
+git clone https://github.com/bgyss/c4py.git
 cd c4py
 pip install -e ".[dev]"
 ```
