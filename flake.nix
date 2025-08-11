@@ -100,21 +100,27 @@
             echo "Python: $(python --version)"
             echo "UV: $(uv --version)"
             echo ""
+            
+            # Set up virtual environment automatically
+            if [ ! -d ".venv" ]; then
+              echo "📦 Setting up virtual environment..."
+              uv venv
+              uv sync --dev
+              echo ""
+            fi
+            
+            # Activate virtual environment
+            source .venv/bin/activate
+            export PATH="$PWD/.venv/bin:$PATH"
+            
             echo "Available commands:"
+            echo "  c4py --help          - Run the CLI tool directly"
             echo "  uv sync --dev         - Install dependencies"
             echo "  uv run pytest         - Run tests"
             echo "  uv run ruff check .   - Run linting"
             echo "  uv run ruff format .  - Format code"
             echo "  uv run ty check .     - Type checking"
-            echo "  uv run c4py --help    - Run the CLI tool"
             echo ""
-            
-            # Only show setup instructions if .venv doesn't exist
-            if [ ! -d ".venv" ]; then
-              echo "⚠️  Virtual environment not found."
-              echo "   Run: uv venv && source .venv/bin/activate && uv sync --dev"
-              echo ""
-            fi
           '';
 
           # Python environment

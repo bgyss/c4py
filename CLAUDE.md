@@ -15,7 +15,7 @@ This project supports both Nix flakes and traditional Python development environ
 The project includes a comprehensive Nix flake for reproducible development:
 
 ```bash
-# Enter development environment with all tools
+# Enter development environment with all tools (automatically sets up venv and activates it)
 nix develop
 
 # Or use direnv for automatic activation
@@ -26,6 +26,10 @@ nix build
 
 # Run the package directly
 nix run . -- --help
+
+# In the development shell, c4py command is available directly:
+c4py --help
+echo "test" | c4py
 ```
 
 ### Traditional Python Setup
