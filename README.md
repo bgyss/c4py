@@ -152,35 +152,80 @@ Created: 2024-03-23T14:29:55
 
 ### Setup Development Environment
 
+c4py supports multiple development environment options:
+
+#### Option 1: Nix Flake (Recommended)
+
+If you have Nix installed, you can use the provided flake for a fully reproducible development environment:
+
+```bash
+git clone https://github.com/bgyss/c4py.git
+cd c4py
+
+# Enter development environment (includes Python, UV, and all dev tools)
+nix develop
+
+# Or use direnv for automatic activation
+echo "use flake" > .envrc
+direnv allow
+```
+
+The Nix environment includes:
+- Python 3.12 with all dependencies
+- UV for fast package management
+- Development tools: ruff, mypy, pytest, black, isort
+- Git, GitHub CLI, and Just task runner
+
+#### Option 2: Traditional Python Setup
+
 ```bash
 git clone https://github.com/bgyss/c4py.git
 cd c4py
 pip install -e ".[dev]"
 ```
 
-### Running Tests
+### Development Tasks
+
+#### Using Just (Nix environment)
+
+If you're using the Nix development environment, you can use the provided `justfile` for common tasks:
 
 ```bash
+just install     # Install dependencies with UV
+just test        # Run tests with coverage
+just test-fast   # Run tests without coverage
+just lint        # Check code with ruff
+just format      # Format code with ruff
+just fix         # Auto-fix issues and format
+just typecheck   # Type check with mypy
+just check       # Run all quality checks
+just build       # Build package with Nix
+just clean       # Clean build artifacts
+```
+
+#### Traditional Commands
+
+```bash
+# Install dependencies
+uv sync --dev  # or pip install -e ".[dev]"
+
+# Run tests
 pytest
+pytest --cov=c4py --cov-report=xml  # with coverage
+
+# Code quality
+ruff check .     # linting
+ruff format .    # formatting
+mypy .           # type checking
 ```
 
 ### Code Style
 
 The project uses:
-
-- black for code formatting
-- isort for import sorting
-- mypy for type checking
-- ruff for linting
-
-Run all style checks:
-
-```bash
-black .
-isort .
-mypy .
-ruff .
-```
+- **ruff** for linting and formatting (primary)
+- **mypy** for type checking
+- **pytest** for testing
+- Legacy tools also available: black, isort, flake8
 
 ## License
 

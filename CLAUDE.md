@@ -8,7 +8,27 @@ c4py is a Python implementation of the C4 ID system - a content-addressable iden
 
 ## Development Environment Setup
 
-This project uses `uv` for dependency management and virtual environment handling:
+This project supports both Nix flakes and traditional Python development environments:
+
+### Nix Flake (Recommended)
+
+The project includes a comprehensive Nix flake for reproducible development:
+
+```bash
+# Enter development environment with all tools
+nix develop
+
+# Or use direnv for automatic activation
+direnv allow  # (if .envrc exists)
+
+# Build the package
+nix build
+
+# Run the package directly
+nix run . -- --help
+```
+
+### Traditional Python Setup
 
 ```bash
 # Install dependencies and create virtual environment
@@ -20,7 +40,34 @@ uv sync --dev
 
 ## Common Development Commands
 
-### Testing
+### Just Task Runner (Nix Environment)
+
+The Nix environment includes a `justfile` with convenient development tasks:
+
+```bash
+# Development workflow
+just install      # Install dependencies with UV
+just test         # Run tests with coverage
+just test-fast    # Run tests without coverage
+just lint         # Check code with ruff
+just format       # Format code with ruff
+just fix          # Auto-fix issues and format
+just typecheck    # Type check with mypy
+just check        # Run all quality checks (lint + typecheck + test)
+
+# Package management
+just build        # Build package with Nix
+just clean        # Clean build artifacts
+just run <args>   # Run c4py CLI with arguments
+
+# Environment
+just shell        # Enter nix develop shell
+just             # Show all available commands
+```
+
+### Direct Commands
+
+#### Testing
 ```bash
 # Run all tests with coverage
 pytest --cov=c4py --cov-report=xml
@@ -35,7 +82,7 @@ pytest tests/test_id.py
 pytest tests/test_id.py::test_id_parsing
 ```
 
-### Code Quality and Linting
+#### Code Quality and Linting
 ```bash
 # Run ruff linting (check only)
 ruff check .
@@ -54,7 +101,7 @@ black .
 isort .
 ```
 
-### Package Management
+#### Package Management
 ```bash
 # Install new dependency
 uv add <package-name>
@@ -64,6 +111,21 @@ uv add --dev <package-name>
 
 # Update all dependencies
 uv sync --upgrade
+```
+
+#### Nix-specific Commands
+```bash
+# Check flake configuration
+nix flake check
+
+# Build package
+nix build
+
+# Run package directly
+nix run . -- <args>
+
+# Update flake inputs
+nix flake update
 ```
 
 ## Code Architecture
@@ -104,9 +166,21 @@ Tests are organized by module in the `tests/` directory:
 
 ## Project Configuration
 
-- **Python Versions**: Supports 3.8-3.12
+- **Python Versions**: Supports 3.8-3.12 (Nix flake uses 3.12)
 - **Build System**: Uses `hatchling` backend
 - **Package Manager**: `uv` for fast dependency resolution
+- **Development Environment**: Nix flake with reproducible environment
+- **Task Runner**: Just for common development tasks
 - **CI/CD**: GitHub Actions with Python matrix testing and codecov integration
-- **Code Style**: Black-compatible formatting (88 char line length) with ruff
+- **Code Style**: Ruff for linting and formatting (88 char line length)
 - **Type Checking**: mypy with strict configuration requiring type annotations
+
+### Nix Flake Features
+
+The `flake.nix` provides:
+- **Reproducible Environment**: Python 3.12 with all dependencies
+- **Development Shell**: Automatic venv setup with UV
+- **Quality Checks**: Automated tests, linting, and type checking via `nix flake check`
+- **Package Build**: Complete package build with `nix build`
+- **CLI Access**: Direct CLI execution with `nix run`
+- **Development Tools**: Git, GitHub CLI, Just task runner, and direnv support
