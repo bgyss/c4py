@@ -15,3 +15,8 @@ htmlcov/
 
 # Mac files
 .DS_Store
+
+# Nix
+result
+result-*
+.direnv/
